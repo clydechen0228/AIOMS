@@ -107,5 +107,11 @@ export const api = {
         });
         if (!res.ok) throw new Error('Failed to update status');
         return res.json();
+    },
+
+    getSalesData: async (): Promise<{ date: string; total: number }[]> => {
+        const res = await fetch(`${BASE_URL}/api/sales`);
+        if (!res.ok) throw new Error('Failed to fetch sales data');
+        return res.json();
     }
 };

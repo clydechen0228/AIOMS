@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { DollarSign, Package, ShoppingBag, Users } from "lucide-react";
 import { MetricCard } from "../components/dashboard/MetricCard";
 import { RecentOrders } from "../components/dashboard/RecentOrders";
+import { SalesChart } from "../components/dashboard/SalesChart";
 import { api, type Metrics } from "../services/api";
 import { Skeleton } from "../components/ui/skeleton";
 
@@ -82,13 +83,7 @@ export function Dashboard() {
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <RecentOrders />
-                {/* Placeholder for Sales Chart - would take up col-span-4 */}
-                <div className="col-span-4 rounded-xl border bg-card text-card-foreground shadow-sm p-6">
-                    <h3 className="text-2xl font-semibold leading-none tracking-tight mb-4">Overview</h3>
-                    <div className="h-[300px] flex items-center justify-center border-dashed border-2 rounded-lg bg-muted/20">
-                        <span className="text-muted-foreground">Sales Chart Visualization (Requires Recharts)</span>
-                    </div>
-                </div>
+                <SalesChart />
             </div>
         </div>
     );

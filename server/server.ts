@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { initializeDatabase, getDb } from './database';
+import path from 'path';
 
 const app = express();
 const port = 3001;
@@ -13,6 +14,12 @@ app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
     next();
 });
+
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+    const distPath = path.resolve(__dirname, '../dist');
+    app.use(express.static(distPath));
+}
 
 // Initialize DB
 initializeDatabase().catch(err => {
@@ -85,7 +92,7 @@ app.post('/api/orders', async (req, res) => {
 
         const result = await db.run(
             'INSERT INTO orders (customerId, customerName, productId, productName, quantity, amount, status, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [customerId, customer.name, productId, product.name, quantity, `$${amount.toFixed(2)}`, 'Pending', date]
+            [customerId, customer.name, productId, product.name, quantity, amount, 'Pending', date]
         );
         res.status(201).json({ id: result.lastID, ...req.body });
     } catch (error) {
@@ -126,10 +133,15 @@ app.get('/api/metrics', async (req, res) => {
         const db = getDb();
         const productCountResult = await db.get('SELECT count(*) as count FROM products');
         const orderCountResult = await db.get("SELECT count(*) as count FROM orders WHERE status != 'Delivered'");
+        const revenueResult = await db.get("SELECT sum(amount) as total FROM orders");
 
-        // In a real app, revenue would be aggregated from orders.amount
+        // Format revenue
+        const totalRevenue = revenueResult.total
+            ? `$${revenueResult.total.toFixed(2)}`
+            : "$0.00";
+
         res.json({
-            totalRevenue: "$45,231.89",
+            totalRevenue,
             activeOrders: String(orderCountResult.count),
             productsInStock: String(productCountResult.count),
             newCustomers: "+12%"
@@ -138,6 +150,31 @@ app.get('/api/metrics', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch metrics' });
     }
 });
+
+// GET /api/sales
+app.get('/api/sales', async (req, res) => {
+    try {
+        const db = getDb();
+        // Aggregate sales by date
+        const sales = await db.all(`
+            SELECT date, sum(amount) as total 
+            FROM orders 
+            GROUP BY date 
+            ORDER BY date ASC 
+            LIMIT 30
+        `);
+        res.json(sales);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch sales data' });
+    }
+});
+
+// Serve index.html for any unknown routes (SPA support)
+if (process.env.NODE_ENV === 'production') {
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../dist', 'index.html'));
+    });
+}
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
