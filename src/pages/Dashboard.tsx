@@ -24,7 +24,7 @@ export function Dashboard() {
         fetchData();
     }, []);
 
-    if (loading || !metrics) {
+    if (loading) {
         return (
             <div className="flex flex-col gap-6">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -36,6 +36,15 @@ export function Dashboard() {
                     <Skeleton className="col-span-3 h-[300px] w-full rounded-xl" />
                     <Skeleton className="col-span-4 h-[300px] w-full rounded-xl" />
                 </div>
+            </div>
+        )
+    }
+
+    if (!metrics) {
+        return (
+            <div className="flex flex-col gap-6 p-8 text-center">
+                <h2 className="text-xl font-semibold text-red-600">Failed to load dashboard data</h2>
+                <p className="text-muted-foreground">Please ensure the backend server is running.</p>
             </div>
         )
     }
