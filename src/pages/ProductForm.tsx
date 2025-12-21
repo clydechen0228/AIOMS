@@ -3,9 +3,18 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
+import { useToast } from "../components/ui/SimpleToast";
 
 export function ProductForm() {
     const navigate = useNavigate();
+    const { toast } = useToast();
+
+    const handleSave = () => {
+        toast("Product saved successfully!", "success");
+        setTimeout(() => {
+            navigate("/products");
+        }, 1000);
+    };
 
     return (
         <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full">
@@ -49,7 +58,7 @@ export function ProductForm() {
 
                     <div className="pt-4 flex justify-end gap-2">
                         <Button variant="outline" onClick={() => navigate("/products")}>Cancel</Button>
-                        <Button onClick={() => navigate("/products")}>Save Product</Button>
+                        <Button onClick={handleSave}>Save Product</Button>
                     </div>
                 </CardContent>
             </Card>

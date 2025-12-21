@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postinstall": "cd server && npm install",
-    "start": "cd server && npm start"
+    "postinstall": "echo 'No Python dependencies needed'",
+    "start": "cd server && python main.py"
   },
   "dependencies": {
     "clsx": "^2.1.1",

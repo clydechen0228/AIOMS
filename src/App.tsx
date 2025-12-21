@@ -11,22 +11,26 @@ import { Customers } from './pages/Customers';
 
 import { InvoiceView } from './pages/InvoiceView';
 
+import { ToasterProvider } from './components/ui/SimpleToast';
+
 function App() {
     return (
-        <Router>
-            <Routes>
-                <Route path="/orders/:id/invoice" element={<InvoiceView />} />
-                <Route element={<DashboardLayout />}>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/orders" element={<Orders />} />
-                    <Route path="/orders/new" element={<CreateOrder />} />
-                    <Route path="/orders/:id" element={<OrderDetails />} />
-                    <Route path="/products" element={<Products />} />
-                    <Route path="/products/new" element={<ProductForm />} />
-                    <Route path="/customers" element={<Customers />} />
-                </Route>
-            </Routes>
-        </Router>
+        <ToasterProvider>
+            <Router>
+                <Routes>
+                    <Route path="/orders/:id/invoice" element={<InvoiceView />} />
+                    <Route element={<DashboardLayout />}>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/orders" element={<Orders />} />
+                        <Route path="/orders/new" element={<CreateOrder />} />
+                        <Route path="/orders/:id" element={<OrderDetails />} />
+                        <Route path="/products" element={<Products />} />
+                        <Route path="/products/new" element={<ProductForm />} />
+                        <Route path="/customers" element={<Customers />} />
+                    </Route>
+                </Routes>
+            </Router>
+        </ToasterProvider>
     );
 }
 

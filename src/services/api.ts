@@ -1,5 +1,12 @@
 
 // Define Types
+export interface AgentLog {
+    agentName: string;
+    action: string;
+    details: string;
+    timestamp: string;
+}
+
 export interface Order {
     id: string;
     customer: string;
@@ -8,7 +15,11 @@ export interface Order {
     status: string;
     date: string;
     amount: string;
+    video_url?: string;
+    logs?: AgentLog[];
 }
+
+
 
 export interface Product {
     id: string;
@@ -65,7 +76,9 @@ export const api = {
             quantity: String(o.quantity),
             status: o.status,
             date: o.date,
-            amount: o.amount
+            amount: o.amount,
+            video_url: o.video_url,
+            logs: o.logs || []
         };
     },
 
@@ -106,6 +119,19 @@ export const api = {
             body: JSON.stringify({ status })
         });
         if (!res.ok) throw new Error('Failed to update status');
+        return res.json();
+    },
+
+    processOrder: async (id: string) => {
+        const res = await fetch(`${BASE_URL}/api/orders/${id}/process`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.error || 'AI processing failed');
+        }
         return res.json();
     },
 

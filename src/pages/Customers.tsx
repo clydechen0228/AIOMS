@@ -7,9 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { api, type Customer } from "../services/api";
 import { Skeleton } from "../components/ui/skeleton";
 
+import { useToast } from "../components/ui/SimpleToast";
+
 export function Customers() {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [loading, setLoading] = useState(true);
+    const { toast } = useToast();
 
     useEffect(() => {
         const fetchCustomers = async () => {
@@ -29,7 +32,7 @@ export function Customers() {
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
-                <Button>
+                <Button onClick={() => toast("Customer management module coming soon!", "info")}>
                     Add Customer
                 </Button>
             </div>
