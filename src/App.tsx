@@ -9,10 +9,13 @@ import { Products } from './pages/Products';
 import { ProductForm } from './pages/ProductForm';
 import { Customers } from './pages/Customers';
 
+import { InvoiceView } from './pages/InvoiceView';
+
 function App() {
     return (
         <Router>
             <Routes>
+                <Route path="/orders/:id/invoice" element={<InvoiceView />} />
                 <Route element={<DashboardLayout />}>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/orders" element={<Orders />} />
@@ -20,7 +23,7 @@ function App() {
                     <Route path="/orders/:id" element={<OrderDetails />} />
                     <Route path="/products" element={<Products />} />
                     <Route path="/products/new" element={<ProductForm />} />
-                    <Route path="/customers" element={<div className="p-4">Customers Content Placeholder</div>} />
+                    <Route path="/customers" element={<Customers />} />
                 </Route>
             </Routes>
         </Router>

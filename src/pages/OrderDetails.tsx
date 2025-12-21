@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Printer, FileText, CheckCircle, Truck, Package, Clock } from "lucide-react";
+import { ArrowLeft, Printer, CheckCircle, Truck, Package, Clock, Play } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import {
@@ -20,20 +20,32 @@ export function OrderDetails() {
     const [order, setOrder] = useState<Order | undefined>(undefined);
     const [loading, setLoading] = useState(true);
 
+    const fetchOrder = async () => {
+        if (!id) return;
+        try {
+            const data = await api.getOrderById(id);
+            setOrder(data);
+        } catch (error) {
+            console.error("Failed to fetch order", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchOrder = async () => {
-            if (!id) return;
-            try {
-                const data = await api.getOrderById(id);
-                setOrder(data);
-            } catch (error) {
-                console.error("Failed to fetch order", error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchOrder();
     }, [id]);
+
+    const handleStatusUpdate = async (status: string) => {
+        if (!order) return;
+        try {
+            await api.updateOrderStatus(order.id, status);
+            fetchOrder(); // Refresh to show new status
+        } catch (error) {
+            console.error("Failed to update status", error);
+            alert("Failed to update status");
+        }
+    };
 
     if (loading) {
         return (
@@ -74,38 +86,52 @@ export function OrderDetails() {
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline">
+                    {order.status === "Pending" && (
+                        <Button onClick={() => handleStatusUpdate("Processing")}>
+                            <Play className="mr-2 h-4 w-4" />
+                            Start Processing
+                        </Button>
+                    )}
+                    {order.status === "Processing" && (
+                        <Button onClick={() => handleStatusUpdate("Shipped")}>
+                            <Truck className="mr-2 h-4 w-4" />
+                            Ship Order
+                        </Button>
+                    )}
+                    {order.status === "Shipped" && (
+                        <Button onClick={() => handleStatusUpdate("Delivered")}>
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Mark Delivered
+                        </Button>
+                    )}
+                    <Button variant="outline" onClick={() => navigate(`/orders/${order.id}/invoice`)}>
                         <Printer className="mr-2 h-4 w-4" />
-                        Print
-                    </Button>
-                    <Button>
-                        <FileText className="mr-2 h-4 w-4" />
-                        Invoice
+                        Print Invoice
                     </Button>
                 </div>
             </div>
 
             {/* Order Status Visualization */}
             <div className="grid grid-cols-4 gap-4">
-                <Card className={order.status === "Pending" ? "border-primary" : ""}>
+                <Card className={order.status === "Pending" ? "border-primary bg-primary/5" : ""}>
                     <CardHeader className="p-4 flex flex-row items-center gap-2 space-y-0">
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <CardTitle className="text-sm font-medium">Order Placed</CardTitle>
                     </CardHeader>
                 </Card>
-                <Card className={order.status === "Processing" ? "border-primary" : ""}>
+                <Card className={order.status === "Processing" ? "border-primary bg-primary/5" : ""}>
                     <CardHeader className="p-4 flex flex-row items-center gap-2 space-y-0">
                         <Package className="h-4 w-4 text-muted-foreground" />
                         <CardTitle className="text-sm font-medium">Processing</CardTitle>
                     </CardHeader>
                 </Card>
-                <Card className={order.status === "Shipped" ? "border-primary" : ""}>
+                <Card className={order.status === "Shipped" ? "border-primary bg-primary/5" : ""}>
                     <CardHeader className="p-4 flex flex-row items-center gap-2 space-y-0">
                         <Truck className="h-4 w-4 text-muted-foreground" />
                         <CardTitle className="text-sm font-medium">Shipped</CardTitle>
                     </CardHeader>
                 </Card>
-                <Card className={order.status === "Delivered" ? "border-primary" : ""}>
+                <Card className={order.status === "Delivered" ? "border-primary bg-primary/5" : ""}>
                     <CardHeader className="p-4 flex flex-row items-center gap-2 space-y-0">
                         <CheckCircle className="h-4 w-4 text-muted-foreground" />
                         <CardTitle className="text-sm font-medium">Delivered</CardTitle>
@@ -131,12 +157,12 @@ export function OrderDetails() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {/* Mock Line Item based on order data */}
+                                {/* Mock Line Item based on order data - In real app we would have order items table */}
                                 <TableRow>
                                     <TableCell className="font-medium">{order.product}</TableCell>
-                                    <TableCell>56-40-6</TableCell> {/* Mock CAS */}
+                                    <TableCell>56-40-6</TableCell>
                                     <TableCell className="text-right">{order.quantity}</TableCell>
-                                    <TableCell className="text-right">$25.00</TableCell>
+                                    <TableCell className="text-right"> - </TableCell> {/* Need price in generic order type */}
                                     <TableCell className="text-right">{order.amount}</TableCell>
                                 </TableRow>
                             </TableBody>
@@ -152,7 +178,7 @@ export function OrderDetails() {
                             </div>
                             <div className="flex items-center gap-8 text-sm">
                                 <span className="text-muted-foreground">Shipping</span>
-                                <span>$50.00</span>
+                                <span>$0.00</span>
                             </div>
                             <div className="flex items-center gap-8 font-bold text-lg mt-2">
                                 <span>Total</span>
@@ -175,7 +201,7 @@ export function OrderDetails() {
                                 </div>
                                 <div>
                                     <div className="font-medium">{order.customer}</div>
-                                    <div className="text-sm text-muted-foreground">customer@example.com</div>
+                                    <div className="text-sm text-muted-foreground">Client ID: #CUST-{order.id}</div>
                                 </div>
                             </div>
                             <div className="text-sm text-muted-foreground">
