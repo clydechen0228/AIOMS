@@ -1,5 +1,5 @@
 services:
-  web:
+  frontend:
     build: .
     ports:
       - "5173:5173"
@@ -8,3 +8,13 @@ services:
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+
+  backend:
+    build: ./server
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./server:/app
+    restart: always
